@@ -36,8 +36,8 @@ bot = Bot()
     name="reload",
 )
 @commands.is_owner()
-async def reload_cog(interaction: discord.Interaction):
-    await interaction.response.defer(ephemeral=True, thinking=True)
+async def reload_cog(ctx: commands.Context):
+    await ctx.defer(ephemeral=True)
 
     for filename in os.listdir("./src/cogs"):
         if filename.startswith("_"):
@@ -52,7 +52,7 @@ async def reload_cog(interaction: discord.Interaction):
         await bot.reload_extension(f"src.cogs.{cog_name}")
         bot.logger.info(f"리로드 완료: src.cogs.{cog_name}")
 
-    await interaction.response.send_message("리로드 완료!", ephemeral=True)
+    await ctx.send("리로드 완료", ephemeral=True)
 
 @reload_cog.error
 async def reload_cog_error(interaction: discord.Interaction, error: commands.CommandError):
