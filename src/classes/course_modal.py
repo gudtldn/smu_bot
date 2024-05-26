@@ -17,7 +17,7 @@ class CourseInfo:
                 max_length=100,
             ),
             "category": discord.ui.TextInput(
-                label="카테고리(프로그래밍, 웹, 디자인, 기타 등),",
+                label="카테고리(프로그래밍, 웹, 디자인, 기타 등)",
                 placeholder="카테고리를 입력해주세요.",
                 default=category,
                 required=True,
