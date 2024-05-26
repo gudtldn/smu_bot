@@ -4,9 +4,9 @@ from discord.ext import commands
 import os
 import dotenv
 import logging
+from logging.handlers import TimedRotatingFileHandler
 
 from src.classes.bot import Bot
-from src.classes.file_handler import TimedRotatingFileHandler
 
 dotenv.load_dotenv() # .env 파일 로드
 
