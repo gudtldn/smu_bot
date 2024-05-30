@@ -100,15 +100,16 @@ class CourseModal(discord.ui.Modal, title="강좌 신청"):
         channel_overwrites = {
             # interaction.guild.default_role = @everyone
             interaction.user: discord.PermissionOverwrite(
-                send_messages=True,              # 메시지 보내기
-                manage_threads=True,             # 스레드 관리하기
-                create_public_threads=True,      # 공개 스레드 만들기
-                send_messages_in_threads=True,   # 스레드에서 메시지 보내기
-                embed_links=True,                # 링크 첨부
-                attach_files=True,               # 파일 첨부
-                manage_messages=True,            # 메시지 관리
+                manage_channels=True,                    # 채널 관리하기
+                send_messages=True,                      # 메시지 보내기
+                manage_threads=True,                     # 스레드 관리하기
+                create_public_threads=True,              # 공개 스레드 만들기
+                send_messages_in_threads=True,           # 스레드에서 메시지 보내기
+                embed_links=True,                        # 링크 첨부
+                attach_files=True,                       # 파일 첨부
+                manage_messages=True,                    # 메시지 관리
             )
-        }
+        } | selected_category.overwrites                 # 기존 카테고리 권한 상속
 
         new_channel = await interaction.guild.create_text_channel(
             name=self.course_info.course_name.value,
