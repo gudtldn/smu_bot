@@ -76,11 +76,7 @@ class CourseModal(discord.ui.Modal, title="강좌 신청"):
 
     async def on_submit(self, interaction: discord.Interaction["Bot"]):
         def get_view():
-            view = discord.ui.View()
-            button = discord.ui.Button(label="다시 작성하기", style=discord.ButtonStyle.primary)
-            button.callback = lambda interaction: interaction.response.send_modal(CourseModal(**self.course_info))
-            view.add_item(button)
-            return view
+            return CourseModalView(**self.course_info)
 
         if re.search(r"[^\w\s\-]", self.course_info.course_name.value):
             await interaction.response.send_message("강좌 이름에 `-`를 제외한 특수문자를 사용할 수 없습니다.", view=get_view(), ephemeral=True)
@@ -121,7 +117,11 @@ class CourseModal(discord.ui.Modal, title="강좌 신청"):
         await interaction.response.send_message(f"강좌가 만들어졌습니다! 좋은 강의 부탁드려요!\n<#{new_channel.id}>", ephemeral=True)
 
     async def on_error(self, interaction: discord.Interaction["Bot"], error: Exception) -> None:
-        await interaction.response.send_message("강좌를 만들던 도중 에러가 발생하였습니다. 다시 시도해 주세요.", ephemeral=True)
+        await interaction.response.send_message(
+            "강좌를 만들던 도중 에러가 발생하였습니다. 다시 시도해 주세요.",
+            view=CourseModalView(**self.course_info),
+            ephemeral=True
+        )
         error_msg = (
             "Ignoring exception in CourseModal\n"
             f"신청자: {interaction.user}\n"
@@ -130,3 +130,16 @@ class CourseModal(discord.ui.Modal, title="강좌 신청"):
             f"강좌 설명: {self.course_info.description.value}"
         )
         interaction.client.logger.error(error_msg, exc_info=error)
+
+
+class CourseModalView(discord.ui.View):
+    def __init__(self, **kwargs):
+        super().__init__(timeout=None)
+
+        button = discord.ui.Button(
+            label="강좌 신청하기" if len(kwargs) == 0 else "다시 신청하기",
+            style=discord.ButtonStyle.primary,
+            custom_id="course_modal_button" if len(kwargs) == 0 else None,
+        )
+        button.callback = lambda interaction: interaction.response.send_modal(CourseModal(**kwargs))
+        self.add_item(button)
