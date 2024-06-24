@@ -40,7 +40,8 @@ class Bot(commands.Bot):
 
         message_id = None
         async for message in channel.history(limit=1):
-            message_id = message.id
+            if message is not None and message.author == self.user:
+                message_id = message.id
 
         if message_id is None:
             # 강좌 신청하기 메시지를 생성
