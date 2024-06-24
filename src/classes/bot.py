@@ -4,7 +4,7 @@ from discord.ext import commands
 import os
 import logging
 
-from src.classes.course_modal import CourseModal
+from src.classes.course_modal import CourseModalView
 
 
 class Bot(commands.Bot):
@@ -35,27 +35,26 @@ class Bot(commands.Bot):
     async def on_ready(self):
         self.logger.info(f"Logged in as {self.user}")
 
-        # 강좌 신청하기 메시지 생성
+        # 강좌 신청하기 메시지가 있는지 확인
         channel: discord.TextChannel = self.get_channel(1244194576189620275)
 
-        last_message = None
+        message_id = None
         async for message in channel.history(limit=1):
-            last_message = message
+            message_id = message.id
 
-        if last_message is not None and last_message.author == self.user:
-            await last_message.delete()
-
-        embed = discord.Embed(
-            title="강좌 신청하기",
-            description="강좌 신청을 하려면 아래 버튼을 눌러주세요.",
-            color=discord.Color.blue()
-        )
-        view = discord.ui.View(timeout=None)
-        button = discord.ui.Button(label="신청하기", style=discord.ButtonStyle.primary)
-        button.callback = lambda interaction: interaction.response.send_modal(CourseModal())
-        view.add_item(button)
-
-        await channel.send(embed=embed, view=view)
+        if message_id is None:
+            # 강좌 신청하기 메시지를 생성
+            embed = discord.Embed(
+                title="강좌 신청하기",
+                description="강좌 신청을 하려면 아래 버튼을 눌러주세요.",
+                color=discord.Color.blue()
+            )
+            await channel.send(embed=embed, view=CourseModalView())
+            self.logger.info("course modal message created")
+        else:
+            # 강좌 신청하기 메시지에 뷰를 추가
+            self.add_view(CourseModalView(), message_id=message_id)
+            self.logger.info("course modal view added")
 
     async def on_message(self, message: discord.Message):
         if message.author.bot:

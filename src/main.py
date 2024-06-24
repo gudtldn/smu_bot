@@ -32,7 +32,7 @@ logging.getLogger().addHandler(file_handler)
 
 bot = Bot()
 
-@bot.hybrid_command(
+@bot.command(
     name="reload",
 )
 @commands.is_owner()
