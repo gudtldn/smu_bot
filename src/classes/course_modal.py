@@ -1,13 +1,18 @@
 import discord
 
 import re
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 if TYPE_CHECKING:
     from src.classes.bot import Bot
 
 
 class CourseInfo:
-    def __init__(self, course_name: str=None, category: str=None, description: str=None):
+    def __init__(
+        self,
+        course_name: Optional[str] = None,
+        category: Optional[str] = None,
+        description: Optional[str] = None
+    ):
         self.__course_info = {
             "course_name": discord.ui.TextInput(
                 label="강좌 이름(채널명)",
@@ -17,7 +22,7 @@ class CourseInfo:
                 max_length=100,
             ),
             "category": discord.ui.TextInput(
-                label="category list",
+                label="mutable category", # 카테고리 목록에 따라 유동적으로 변경
                 placeholder="카테고리를 입력해주세요.",
                 default=category,
                 required=True,
@@ -27,8 +32,9 @@ class CourseInfo:
                 label="강좌 설명",
                 placeholder="강좌 설명을 입력해주세요.",
                 default=description,
-                required=True,
                 style=discord.TextStyle.long,
+                max_length=1024,
+                required=True,
             ),
             "agree": discord.ui.TextInput(
                 label="강의 진행 규칙을 잘 읽고, 동의하시면 \"동의합니다\"를 입력해주세요.",
