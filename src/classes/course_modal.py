@@ -17,7 +17,7 @@ class CourseInfo:
                 max_length=100,
             ),
             "category": discord.ui.TextInput(
-                label="카테고리(프로그래밍, 웹, 디자인, 기타 등)",
+                label="category list",
                 placeholder="카테고리를 입력해주세요.",
                 default=category,
                 required=True,
@@ -39,19 +39,19 @@ class CourseInfo:
 
     @property
     def course_name(self) -> discord.ui.TextInput:
-        return self.__course_info["course_name"]
+        return self.__course_info['course_name']
 
     @property
     def category(self) -> discord.ui.TextInput:
-        return self.__course_info["category"]
+        return self.__course_info['category']
 
     @property
     def description(self) -> discord.ui.TextInput:
-        return self.__course_info["description"]
+        return self.__course_info['description']
 
     @property
     def agree(self) -> discord.ui.TextInput:
-        return self.__course_info["agree"]
+        return self.__course_info['agree']
 
     def keys(self):
         return self.__course_info.keys()
@@ -67,9 +67,24 @@ class CourseInfo:
 
 
 class CourseModal(discord.ui.Modal, title="강좌 신청"):
-    def __init__(self, course_name: str=None, category: str=None, description: str=None, **kwargs):
+    def __init__(
+        self,
+        interaction: discord.Interaction["Bot"],
+        course_name: str = None,
+        category: str = None,
+        description: str = None,
+        **kwargs
+    ):
         super().__init__()
         self.course_info = CourseInfo(course_name, category, description)
+
+        # 카테고리의 목록에 따라 유동적으로 변경
+        guild_course_categories = { # OrderedSet처럼 사용
+            course.name[:-3]: None
+                for course in interaction.guild.categories
+                if course.name.endswith("강좌")
+        }
+        self.course_info.category.label = f"카테고리({', '.join(guild_course_categories.keys())} 등)"
 
         for item in self.course_info.values():
             self.add_item(item)
@@ -141,5 +156,5 @@ class CourseModalView(discord.ui.View):
             style=discord.ButtonStyle.primary,
             custom_id="course_modal_button" if len(kwargs) == 0 else None,
         )
-        button.callback = lambda interaction: interaction.response.send_modal(CourseModal(**kwargs))
+        button.callback = lambda interaction: interaction.response.send_modal(CourseModal(interaction, **kwargs))
         self.add_item(button)
