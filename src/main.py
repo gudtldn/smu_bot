@@ -59,7 +59,11 @@ async def reload_cog_error(interaction: discord.Interaction, error: commands.Com
     if isinstance(error, commands.NotOwner):
         interaction.command_failed = False
 
-bot.run(
-    token=os.getenv("DISCORD_BOT_TOKEN"),
-    log_level=logging.INFO
-)
+def main():
+    bot.run(
+        token=os.getenv("DISCORD_BOT_TOKEN"),
+        log_level=logging.INFO
+    )
+
+if __name__ == "__main__":
+    main()
