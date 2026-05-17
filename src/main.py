@@ -12,8 +12,9 @@ dotenv.load_dotenv() # .env 파일 로드
 
 
 # 파일 로그 설정
+os.makedirs("./logs", exist_ok=True)
 file_handler = TimedRotatingFileHandler(
-    filename=f"./logs/latest.log",
+    filename="./logs/latest.log",
     when="midnight",
     interval=1,
     backupCount=30,
