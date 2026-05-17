@@ -1,8 +1,50 @@
-FROM python:3.12-slim
+# syntax=docker/dockerfile:1.7
 
-COPY ./ /data
-WORKDIR /data
+# ---- Stage 1: builder ----
+FROM python:3.14-slim AS builder
 
-RUN pip install -r requirements.txt
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_PROJECT_ENVIRONMENT=/app/.venv
 
-CMD [ "python3", "-m", "src.main" ]
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+        build-essential libffi-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
+
+WORKDIR /app
+
+COPY pyproject.toml uv.lock ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project --no-dev
+
+# ---- Stage 2: runtime ----
+FROM python:3.14-slim AS runtime
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/app/.venv/bin:$PATH" \
+    TZ=Asia/Seoul
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends tzdata tini \
+ && ln -sf /usr/share/zoneinfo/Asia/Seoul /etc/localtime \
+ && rm -rf /var/lib/apt/lists/* \
+ && groupadd --system app && useradd --system --gid app --home /app app
+
+WORKDIR /app
+
+COPY --from=builder /app/.venv /app/.venv
+COPY --chown=app:app . /app
+
+RUN mkdir -p /app/logs && chown -R app:app /app
+
+USER app
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["python", "-m", "src.main"]
