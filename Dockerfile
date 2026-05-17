@@ -32,7 +32,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     TZ=Asia/Seoul
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends tzdata tini \
+ && apt-get install -y --no-install-recommends tzdata tini gosu \
  && ln -sf /usr/share/zoneinfo/Asia/Seoul /etc/localtime \
  && rm -rf /var/lib/apt/lists/* \
  && groupadd --system app && useradd --system --gid app --home /app app
@@ -41,10 +41,9 @@ WORKDIR /app
 
 COPY --from=builder /app/.venv /app/.venv
 COPY --chown=app:app . /app
+COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
-RUN mkdir -p /app/logs && chown -R app:app /app
+RUN mkdir -p /app/logs
 
-USER app
-
-ENTRYPOINT ["/usr/bin/tini", "--"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["python", "-m", "src.main"]
